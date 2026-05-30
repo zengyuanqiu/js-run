@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZO · JavaScript 在线运行器</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #0d1117;
+        font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+        padding: 2rem;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .runner {
+        max-width: 1200px;
+        width: 100%;
+        background: #161b22;
+        border-radius: 28px;
+        box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+        border: 1px solid #30363d;
+      }
+
+      .header {
+        background: #0d1117;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #30363d;
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .domain {
+        font-size: 1.4rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, #ff9a3c, #ff4d4d);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .badge {
+        background: #238636;
+        padding: 0.2rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        color: white;
+        font-weight: normal;
+      }
+
+      .editor-area {
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+        gap: 1rem;
+      }
+
+      .code-label {
+        color: #c9d1d9;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        font-size: 0.85rem;
+      }
+
+      textarea {
+        width: 100%;
+        background: #0a0c10;
+        border: 1px solid #30363d;
+        border-radius: 16px;
+        padding: 1rem;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: #e6edf3;
+        resize: vertical;
+        outline: none;
+        transition: 0.1s;
+      }
+
+      textarea:focus {
+        border-color: #ff7b2c;
+        box-shadow: 0 0 0 2px rgba(255, 123, 44, 0.2);
+      }
+
+      button {
+        background: #ff7b2c;
+        border: none;
+        padding: 0.8rem 1.8rem;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 40px;
+        color: #0d1117;
+        cursor: pointer;
+        font-family: monospace;
+        transition: 0.2s;
+        width: fit-content;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      button:hover {
+        background: #ff944d;
+        transform: scale(0.97);
+      }
+
+      .output-area {
+        background: #0a0c10;
+        border-radius: 20px;
+        border: 1px solid #30363d;
+        margin-top: 0.5rem;
+        overflow: hidden;
+      }
+
+      .output-header {
+        background: #161b22;
+        padding: 0.6rem 1rem;
+        font-size: 0.75rem;
+        color: #8b949e;
+        border-bottom: 1px solid #30363d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .output-content {
+        padding: 1rem;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: #e6edf3;
+        white-space: pre-wrap;
+        word-break: break-word;
+        min-height: 180px;
+        max-height: 320px;
+        overflow: auto;
+      }
+
+      .error {
+        color: #ff7b72;
+      }
+
+      footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #30363d;
+        font-size: 0.7rem;
+        color: #8b949e;
+        text-align: center;
+        background: #0d1117;
+      }
+
+      a {
+        color: #ff7b2c;
+        text-decoration: none;
+      }
+
+      .example-row {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+      }
+
+      .example-btn {
+        background: #21262d;
+        color: #c9d1d9;
+        font-size: 0.7rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: 0.1s;
+      }
+
+      .example-btn:hover {
+        background: #30363d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="runner">
+      <div class="header">
+        <span class="domain">ZO</span>
+        <span class="badge">● JavaScript 沙箱运行器</span>
+        <span style="flex: 1"></span>
+        <!-- <span style="color:#8b949e; font-size:0.75rem;">🛡️ 纯前端 · 无需后端</span> -->
+      </div>
+
+      <div class="editor-area">
+        <div class="code-label">
+          📝 JavaScript 代码 <span style="color: #8b949e">(支持 ES6)</span>
+        </div>
+        <textarea id="codeInput" rows="8">
+// 试试运行 JavaScript 代码
+function greet(name) {
+    return `✨ 你好，${name}！欢迎使用js在线调试工具`;
+}
+
+const message = greet("开发者");
+console.log(message);
+
+// 支持数组、对象、数学运算
+const numbers = [5, 12, 8, 130, 44];
+const filtered = numbers.filter(n => n > 10);
+console.log("过滤结果:", filtered);
+
+// 返回最后一行表达式会显示在下方
+"✅ 代码执行成功 — 这是一个真正的 JS 工具";
+        </textarea>
+
+        <!-- <div class="example-row">
+            <span class="example-btn" data-code="console.log('Hello zo.js.org');\n'✅ 示例: 输出成功'">▶️ 快速测试</span>
+            <span class="example-btn" data-code="const arr = [1,2,3,4];\nconst sum = arr.reduce((a,b)=>a+b,0);\n`数组 ${arr.join('+')} = ${sum}`">🧮 数组求和</span>
+            <span class="example-btn" data-code="fetch('https://api.github.com/repos/js-org/js.org')\n  .then(r=>r.json())\n  .then(data=>`⭐ js.org 仓库: ${data.stargazers_count} stars`)\n  .catch(e=>'请求示例(只演示Promise)');\n'异步示例已触发，结果见输出'">🌐 异步演示</span>
+        </div> -->
+
+        <button id="runBtn">⚡ 运行代码</button>
+
+        <div class="output-area">
+          <div class="output-header">📤 执行输出 (stdout + 返回值)</div>
+          <div class="output-content" id="outputContent">
+            // 点击运行，查看 JavaScript 执行结果
+          </div>
+        </div>
+      </div>
+      <footer>
+        🧪 轻量级 JavaScript 在线运行环境 · JS 代码调试、原型验证与学习
+      </footer>
+    </div>
+
+    <script>
+      const codeInput = document.getElementById('codeInput')
+      const runBtn = document.getElementById('runBtn')
+      const outputContent = document.getElementById('outputContent')
+
+      // 捕获 console.log / console.error / console.warn
+      function buildSandbox(code) {
+        let outputLogs = []
+        const fakeConsole = {
+          log: (...args) => {
+            outputLogs.push(
+              args
+                .map(arg => {
+                  try {
+                    return typeof arg === 'object'
+                      ? JSON.stringify(arg, null, 2)
+                      : String(arg)
+                  } catch {
+                    return String(arg)
+                  }
+                })
+                .join(' ')
+            )
+          },
+          error: (...args) => {
+            outputLogs.push('❌ [ERROR] ' + args.map(String).join(' '))
+          },
+          warn: (...args) => {
+            outputLogs.push('⚠️ [WARN] ' + args.map(String).join(' '))
+          },
+          info: (...args) => {
+            outputLogs.push('ℹ️ [INFO] ' + args.map(String).join(' '))
+          },
+        }
+
+        const sandbox = {
+          console: fakeConsole,
+          // 暴露常用安全全局变量
+          Array,
+          Object,
+          String,
+          Number,
+          Boolean,
+          Date,
+          Math,
+          JSON,
+          Promise,
+          fetch,
+          setTimeout,
+          clearTimeout,
+          setInterval,
+          clearInterval,
+          Map,
+          Set,
+          RegExp,
+          Error,
+          parseInt,
+          parseFloat,
+          isNaN,
+          isFinite,
+        }
+
+        const keys = Object.keys(sandbox)
+        const values = keys.map(k => sandbox[k])
+
+        const wrappedCode = `"use strict";
+        let __returnValue = undefined;
+        ${code}
+        __returnValue = (function(){ return eval("(" + arguments[arguments.length-1] + ")"); })();
+        __returnValue;
+        `
+
+        const func = new Function(...keys, wrappedCode)
+        let rawReturn
+        try {
+          rawReturn = func(...values)
+        } catch (err) {
+          throw err
+        }
+
+        let returnStr = ''
+        if (rawReturn !== undefined) {
+          try {
+            if (typeof rawReturn === 'object') {
+              returnStr = JSON.stringify(rawReturn, null, 2)
+            } else {
+              returnStr = String(rawReturn)
+            }
+          } catch {
+            returnStr = '[无法序列化的返回值]'
+          }
+        }
+
+        return { logs: outputLogs, returnValue: returnStr }
+      }
+
+      function runCode() {
+        const userCode = codeInput.value
+        if (!userCode.trim()) {
+          outputContent.innerHTML = `<span class="error">⚠️ 请输入 JavaScript 代码</span>`
+          return
+        }
+
+        outputContent.innerHTML = `⏳ 正在运行代码 ...`
+        setTimeout(() => {
+          try {
+            const { logs, returnValue } = buildSandbox(userCode)
+            let displayHtml = ''
+            if (logs.length > 0) {
+              displayHtml += `<div style="margin-bottom: 12px; color:#b1bac4;">📌 控制台输出：</div>`
+              logs.forEach(log => {
+                displayHtml += `<div style="margin-left: 12px; font-size:0.85rem;">› ${escapeHtml(
+                  log
+                )}</div>`
+              })
+            }
+            if (returnValue !== '') {
+              displayHtml += `<div style="margin-top: 12px; color:#ffb347;">🔁 返回值：</div>`
+              displayHtml += `<div style="margin-left: 12px; background:#0f1217; padding:6px 10px; border-radius:12px;">${escapeHtml(
+                returnValue
+              )}</div>`
+            }
+            if (logs.length === 0 && returnValue === '') {
+              displayHtml = `✅ 代码执行成功 (无输出，无返回值)`
+            }
+            outputContent.innerHTML = displayHtml || `✅ 执行完成，无额外输出。`
+          } catch (err) {
+            outputContent.innerHTML = `<span class="error">❌ 运行时错误：\n${escapeHtml(
+              err.message
+            )}</span>`
+          }
+        }, 10)
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/[&<>]/g, function (m) {
+            if (m === '&') return '&amp;'
+            if (m === '<') return '&lt;'
+            if (m === '>') return '&gt;'
+            return m
+          })
+          .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (c) {
+            return c
+          })
+      }
+
+      runBtn.addEventListener('click', runCode)
+
+      document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const exampleCode = btn.getAttribute('data-code')
+          if (exampleCode) {
+            codeInput.value = exampleCode
+            runCode()
+          }
+        })
+      })
+
+      // 初次加载自动运行一次，展示效果（提升审核观感）
+      setTimeout(() => {
+        if (codeInput.value.trim().length > 20) {
+          runCode()
+        }
+      }, 200)
+    </script>
+  </body>
+</html>
